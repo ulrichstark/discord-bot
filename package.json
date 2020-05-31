@@ -1,0 +1,16 @@
+{
+    "name": "discordbot",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "tsc --outDir build src/index.ts && node -r dotenv/config build/index.js"
+    },
+    "author": "Chris",
+    "license": "ISC",
+    "dependencies": {
+        "@types/node": "^14.0.6",
+        "discord.js": "^12.2.0",
+        "dotenv": "^8.2.0",
+        "fs": "0.0.1-security",
+        "typescript": "^3.9.3"
+    }
+}
