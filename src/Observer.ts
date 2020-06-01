@@ -174,4 +174,25 @@ export class Observer {
         }
     }
 
+    public findTop(count: number) {
+        var top: Target[] = [];
+
+        //Targets nach minutesOnServerToday absteigend sortieren
+        this.targets.sort(function(a,b) {
+            const amins = a.minutesOnServerToday;
+            const bmins = b.minutesOnServerToday;
+            if (amins < bmins) { return 1; }
+            else if (amins == bmins) { return 0; }
+            else { return -1; }
+        });
+
+        this.save();
+
+        for (let i = 0; i < count && i<this.targets.length; i++) {
+            top.push(this.targets[i]);
+        }
+
+        return top;
+    }
+
 }

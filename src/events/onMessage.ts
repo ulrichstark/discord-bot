@@ -1,6 +1,8 @@
 import {Message, MessageAttachment, MessageEmbed} from "discord.js";
 import { Bot } from "../Bot";
 import { strict } from "assert";
+import { Observer } from "../Observer";
+import { Target } from "../Target";
 
 const COMMAND_PREFIX = "!";
 
@@ -22,19 +24,27 @@ function handleCommand(bot: Bot, message: Message) {
     const args = content.substring(COMMAND_PREFIX.length).split(" ");
 
     switch (args[0]) {
-        case "ping":
-            channel.send("pong");
+        case "help":{
+            var output = "Alle implementierten Befehle:\n";
+            output += "!startObserving: Starte die Überwachung deiner Onlinezeit\n";
+            output += "!stopObserving: Beende die Überwachung deiner Onlinezeit\n";
+            output += "!uptime: Zeige deine aktuelle Onlinezeit an\n";
+            output += "!setColor <farbe>: Setze deine persönliche Farbe\n";
+            output += "!colors: Erhalte eine Liste der erlaubten Farben\n";
+            output += "!top3: Erhalte eine Top3 Liste der Onlinezeiten\n";
+            message.author.send(output);
             break;
+        }
         case "clear": {
             if (member && member.hasPermission("MANAGE_MESSAGES")) {
                 if (args.length < 2) {
-                    channel.send("Zweites Argument erforderlich!");
+                    channel.send("Oh jee! Zweites Argument erforderlich!");
                 } else {
                     const messageCount = Number.parseInt(args[1]);
                     channel.bulkDelete(messageCount + 1);
                 }
             } else {
-                channel.send("Nicht die erfolderlichen Rechte!");
+                channel.send("Oh jee! Nicht die erfolderlichen Rechte!");
             }
             break;
         }
@@ -92,13 +102,18 @@ function handleCommand(bot: Bot, message: Message) {
                         color = "DEFAULT";
                     }
                     
-                    const embed = new MessageEmbed().setTitle("Heutige Onlinezeit von " + (member.user.username).toString())
+                    const embed = new MessageEmbed().setTitle("Heutige Onlinezeit")
                                                     .setColor(color)
-                                                    .setDescription("Stunden: " + stunden.toString() + "\nMinuten: " + minutes.toString() );
+                                                    .setDescription(member.user.username.toString())
+                                                    .setThumbnail(member.user.displayAvatarURL())
+                                                    .addFields(
+                                                        { name: 'Stunden', value: stunden.toString(), inline : true },
+                                                        { name: 'Minuten', value: minutes.toString(), inline: true },
+                                                    );
                     channel.send(embed);
                     
                 }else{
-                    message.reply("Du wurdest heute nicht überwacht!");
+                    message.reply("Oh jee! Du wurdest heute nicht überwacht!");
                 }
             }
             break;
@@ -106,13 +121,13 @@ function handleCommand(bot: Bot, message: Message) {
         case "setColor":{
             if(member){
                 if (args.length < 2) {
-                    message.reply("Als zweites Argument muss eine erlaubte Farbe übergeben werden");
+                    message.reply("Oh jee! Als zweites Argument muss eine erlaubte Farbe übergeben werden");
                 } else {
 
                     const color = args[1];
                     if(!bot.observer.availableColors.includes(color)){
-                        message.reply("Nicht erlaubte Farbe");
-                        message.author.send("Erlaubte Farben:\n" + bot.observer.availableColors.toString());
+                        message.reply("Oh jee! Nicht erlaubte Farbe");
+                        //message.author.send("Erlaubte Farben:\n" + bot.observer.availableColors.toString());
                     }else{
                         const r = bot.observer.setColor(member.id, color);
                         if(r){
@@ -121,10 +136,54 @@ function handleCommand(bot: Bot, message: Message) {
                     }
                 }                    
              }else{
-                    message.reply("Du wirst nicht überwacht!");
+                    message.reply("Oh jee! Du wirst nicht überwacht!");
              }
             break;
-        }
+        }  
+        case "colors": {
+            message.author.send("Erlaubte Farben:\n" + bot.observer.availableColors.toString());
+            break;
+        }      
+        case "top3":{
+            if(message.guild == null ){
+                message.reply("Oh jee, das hat nicht geklappt");
+                return;
+            }
+            const top = bot.observer.findTop(3);
+
+            const embed = new MessageEmbed().setTitle("Top 3 Onlinezeiten")
+                                                    .setColor("DARK_GOLD");
+
+            if(message.guild ){
+                const banner = message.guild.bannerURL();
+                if( banner !== null){
+                    embed.setThumbnail(banner);
+                }
+            }                       
+
+            for(const target of top ){
+
+                if(target !== null){
+                    var minutes = target.minutesOnServerToday;
+                    if(minutes === undefined || minutes === null){
+                        minutes = 0;
+                    }
+                    var stunden = Math.floor(minutes / 60);
+                    minutes = minutes %60;
+
+                    const { id } = target;
+                    const member = message.guild.members.resolve(id);
+
+                    if (member) {
+                        embed.addField(member.user.username.toString(), stunden.toString()+ " h "+ minutes.toString()+" min" );
+                    }
+                }
+            }
+
+            channel.send(embed);
+
+            break;
+        }        
     }
 }
 
