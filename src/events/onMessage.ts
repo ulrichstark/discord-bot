@@ -76,15 +76,20 @@ function handleCommand(bot: Bot, message: Message) {
         }
         case "uptime":{
             if(member){
-                const target = bot.observer.getTarget(member.id);
-                if(target){
+                bot.observer.update(member.id, message, Date.now()); //Targeteintrag updaten
+                const target = bot.observer.getTarget(member.id); //Targeteintrag holen
+
+                if(target !== null){
                     var minutes = target.minutesOnServerToday;
                     if(minutes === undefined || minutes === null){
                         minutes = 0;
                     }
+                    var stunden = Math.floor(minutes / 60);
+                    minutes = minutes %60;
+                    
                     const embed = new MessageEmbed().setTitle("Heutige Onlinezeit von " + (member.user.username).toString())
                                                     .setColor(0xffffff)
-                                                    .setDescription("Minuten: " + minutes.toString() );
+                                                    .setDescription("Stunden: " + stunden.toString() + "\nMinuten: " + minutes.toString() );
                     channel.send(embed);
                     
                 }else{

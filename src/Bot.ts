@@ -17,7 +17,7 @@ export class Bot {
         this.bot.on("message", (message) => onMessage(this, message));
         this.bot.on("voiceStateUpdate", (voiceStateOld, voiceStateNew) => onVoiceStateUpdate(this, voiceStateOld, voiceStateNew));
 
-        this.observer = new Observer();
+        this.observer = new Observer(this);
 
         // const channelPromise = this.bot.channels.fetch("690914667220172940");
         // channelPromise.then((channel) => console.log("Channel:", channel));

@@ -18,7 +18,7 @@ export function onVoiceStateUpdate(bot: Bot, voiceStateOld: VoiceState, voiceSta
     }
 
     if(bot.observer.findIndexOfTarget(newMember.id) === null){
-        console.log("Dieser Nutzer wird nicht überwacht");
+        //console.log("Dieser Nutzer wird nicht überwacht");
         return;
     }
 

@@ -8,8 +8,10 @@ const encoding = "utf-8";
 
 export class Observer {
     public targets: Target[];
+    public bot: Bot;
 
-    constructor() {
+    constructor(bot: Bot) {
+        this.bot = bot;
         try {
             const fileInput = readFileSync(file, encoding);
             this.targets = JSON.parse(fileInput);
@@ -42,9 +44,10 @@ export class Observer {
             };
 
             if(message.member !== null){
-            //TODO: check if target is in a channel right now
-                if (message.member.voice.connection?.status == 0 ){
-                    console.log("Nutzer der hinzugefügt wurde, ist im Channel aber wurde noch nicht überwacht!");
+            //TODO: check if target is in a channel of this guild right now
+            //console.log(message.member.voice.channel?.guild.id);
+                if (message.member.voice.channel != null && message.member.voice.channel.guild.id === this.bot.guildid){
+                    console.log("Nutzer der hinzugefügt wurde, ist in einem Channel und wird ab jetzt überwacht!");
                     target.activeSince = Date.now();
                 }
             }
@@ -119,6 +122,39 @@ export class Observer {
 
         }else{
             console.log("Target welches bearbeitet werden sollte wurde nicht gefunden");
+        }
+    }
+
+    public update(id: string, message: Message, updateTime: number){
+        const index = this.findIndexOfTarget(id);
+
+        if (index!== null) {
+            const target = this.targets[index];
+
+            //Wenn der Nutzer aktuell aufgezeichnet wird
+            if(target.activeSince !== undefined){
+                target.minutesOnServerToday += Math.floor((updateTime - target.activeSince) / 60000);
+                console.log("Minuten wurden überarbeitet auf"+ target.minutesOnServerToday);
+                target.activeSince = undefined;
+            }else{ //Wenn der Nutzer aktuell nicht aufgezeichnet wird
+                console.log("Das letzte Connecten wurde nicht aufgezeichnet");
+            }
+
+            if(message.member !== null){    
+                //Member befindet sich gerade in einem Channel
+                if (message.member.voice.channel != null && message.member.voice.channel.guild.id === this.bot.guildid){
+                    target.activeSince = updateTime;
+                    console.log("zeit für den Member wurde gupdated");
+                }
+            }else{
+                target.activeSince = undefined;
+                console.log("zeit update fehlgeschlagen, da die Message keinen member besitzt");
+            }
+        
+            this.save();
+
+        }else{
+            console.log("Target welches geupdated werden sollte wurde nicht gefunden");
         }
     }
 
