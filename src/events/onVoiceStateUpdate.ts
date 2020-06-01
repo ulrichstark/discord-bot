@@ -25,14 +25,14 @@ export function onVoiceStateUpdate(bot: Bot, voiceStateOld: VoiceState, voiceSta
 
     if (!oldVoiceChannel && newVoiceChannel) {
         // Gejoint
-        console.log("Target gejoint");
+        //console.log("Target gejoint");
         bot.observer.connected(newMember.id, Date.now() );
     }
 
 
     if (oldVoiceChannel && !newVoiceChannel) {
         // Geleavet
-        console.log("Target Disconnected");
+        //console.log("Target Disconnected");
         bot.observer.disconnected(newMember.id, Date.now() );        
     }
 }

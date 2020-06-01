@@ -63,7 +63,7 @@ function handleCommand(bot: Bot, message: Message) {
             break;
         }
         case "listObserving": {
-            if (message.guild) {
+            if (message.guild && member && member.hasPermission("ADMINISTRATOR")) {
                 let output = "";
                 if(bot.observer.targets.length > 0){
                     output = "Liste an observierten Einheiten:\n";
