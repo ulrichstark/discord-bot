@@ -86,9 +86,14 @@ function handleCommand(bot: Bot, message: Message) {
                     }
                     var stunden = Math.floor(minutes / 60);
                     minutes = minutes %60;
+
+                    var color = target.color;
+                    if(color === undefined){
+                        color = "DEFAULT";
+                    }
                     
                     const embed = new MessageEmbed().setTitle("Heutige Onlinezeit von " + (member.user.username).toString())
-                                                    .setColor(0xffffff)
+                                                    .setColor(color)
                                                     .setDescription("Stunden: " + stunden.toString() + "\nMinuten: " + minutes.toString() );
                     channel.send(embed);
                     
@@ -96,6 +101,28 @@ function handleCommand(bot: Bot, message: Message) {
                     message.reply("Du wurdest heute nicht überwacht!");
                 }
             }
+            break;
+        }
+        case "setColor":{
+            if(member){
+                if (args.length < 2) {
+                    message.reply("Als zweites Argument muss eine erlaubte Farbe übergeben werden");
+                } else {
+
+                    const color = args[1];
+                    if(!bot.observer.availableColors.includes(color)){
+                        message.reply("Nicht erlaubte Farbe");
+                        message.author.send("Erlaubte Farben:\n" + bot.observer.availableColors.toString());
+                    }else{
+                        const r = bot.observer.setColor(member.id, color);
+                        if(r){
+                            message.reply("Farbe wurde gesetzt");
+                        }
+                    }
+                }                    
+             }else{
+                    message.reply("Du wirst nicht überwacht!");
+             }
             break;
         }
     }
@@ -120,9 +147,9 @@ function handleNormalMessage(bot: Bot, message: Message) {
         const embed = new MessageEmbed().setTitle("ALARM").setColor(0xff0000).setDescription("ALARM! ALARM!");
         channel.send(embed);
     }
-    if (msg.includes("maul")) {
-        channel.send("Es gibt Maul und es gibt Halts Maul!");
-    }
+    // if (msg.includes("maul")) {
+    //     channel.send("Es gibt Maul und es gibt Halts Maul!");
+    // }
     if (msg.includes("gute_nacht")) {
         channel.send(`Gute Nacht, ${author.toString()}!`);
     }

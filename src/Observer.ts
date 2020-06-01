@@ -6,9 +6,12 @@ import { Bot } from "./Bot";
 const file = "./data/targets.json";
 const encoding = "utf-8";
 
+
 export class Observer {
     public targets: Target[];
     public bot: Bot;
+    public availableColors = ["DEFAULT","WHITE","AQUA","GREEN","BLUE","YELLOW","PURPLE","LUMINOUS_VIVID_PINK","GOLD","ORANGE","RED","GREY","DARKER_GREY","NAVY","DARK_AQUA","DARK_GREEN","DARK_BLUE","DARK_PURPLE","DARK_VIVID_PINK","DARK_GOLD","DARK_ORANGE","DARK_RED","DARK_GREY","LIGHT_GREY","DARK_NAVY","RANDOM"];
+
 
     constructor(bot: Bot) {
         this.bot = bot;
@@ -21,16 +24,6 @@ export class Observer {
         }
     }
 
-    // public checkActivityofTargets(){
-    //     for (const target of this.targets) {
-    //         const { id } = target;
-    //         const member = message.guild.members.resolve(id);
-
-    //                     if (member) {
-    //                         output += member.user.username + "\n";
-    //                     }
-    //     }
-    // }
 
     public addTarget(id: string, message : Message) {
         const index = this.findIndexOfTarget(id);
@@ -40,12 +33,11 @@ export class Observer {
             
             const target: Target = {
                 id: id,
-                minutesOnServerToday: 0
+                minutesOnServerToday: 0,
+                color: "RANDOM"
             };
 
             if(message.member !== null){
-            //TODO: check if target is in a channel of this guild right now
-            //console.log(message.member.voice.channel?.guild.id);
                 if (message.member.voice.channel != null && message.member.voice.channel.guild.id === this.bot.guildid){
                     console.log("Nutzer der hinzugefügt wurde, ist in einem Channel und wird ab jetzt überwacht!");
                     target.activeSince = Date.now();
@@ -156,6 +148,20 @@ export class Observer {
         }else{
             console.log("Target welches geupdated werden sollte wurde nicht gefunden");
         }
+    }
+
+    public setColor(id: string, color: string){
+        const index = this.findIndexOfTarget(id);
+        if(this.availableColors.includes(color)){
+            if (index!== null) {
+                const target = this.targets[index];
+                target.color = color;
+
+                this.save();
+                return true;
+            }
+        }
+        return false;
     }
 
     public getTarget(id: string){
