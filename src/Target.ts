@@ -1,4 +1,5 @@
 export interface Target {
-    id: string;
-    minutesOnServer: number;
+    id: string; //Member id
+    minutesOnServerToday: number;
+    activeSince?: number;
 }

@@ -6,8 +6,9 @@ import { onVoiceStateUpdate } from "./events/onVoiceStateUpdate";
 
 export class Bot {
     private bot: Discord.Client;
-
+    public guild: Discord.Guild | undefined;
     public observer: Observer;
+    public guildid : Discord.Snowflake = "187285993169223680";
 
     constructor() {
         this.bot = new Discord.Client();
