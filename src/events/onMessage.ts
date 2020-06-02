@@ -161,14 +161,15 @@ function handleCommand(bot: Bot, message: Message) {
             const top = bot.observer.findTop(3);
 
             const embed = new MessageEmbed().setTitle("Top 3 Onlinezeiten")
-                                                    .setColor("DARK_GOLD");
+                                            .setColor("DARK_GOLD")
+                                            .setFooter("Die Werte der einzelnen Mitglieder könnten nicht aktuell sein");
 
-            if(message.guild ){
-                const banner = message.guild.bannerURL();
-                if( banner !== null){
-                    embed.setThumbnail(banner);
-                }
-            }                       
+            // if(message.guild ){
+            //     const banner = message.guild.bannerURL();
+            //     if( banner !== null){
+            //         embed.setThumbnail(banner);
+            //     }
+            // }                       
 
             for(const target of top ){
 
