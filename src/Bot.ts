@@ -9,6 +9,7 @@ export class Bot {
     public guild: Discord.Guild | undefined;
     public observer: Observer;
     public guildid : Discord.Snowflake = "187285993169223680";
+    public allowedChannels: Discord.Snowflake[] = ["717149938235998259", "716642203249934377"];
 
     constructor() {
         this.bot = new Discord.Client();

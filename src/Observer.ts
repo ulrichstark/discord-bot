@@ -61,7 +61,7 @@ export class Observer {
 
             if (message.member !== null) {
                 if (message.member.voice.channel != null && message.member.voice.channel.guild.id === this.bot.guildid) {
-                    console.log("Nutzer der hinzugefügt wurde, ist in einem Channel und wird ab jetzt überwacht!");
+                    console.log(message.member.user.username +" wurde hinzugefügt während er in einem Channel ist, ist in einem Channel und wird ab jetzt überwacht!");
                     target.activeSince = Date.now();
                 }
             }
@@ -105,13 +105,13 @@ export class Observer {
         if (index !== null) {
             if (this.targets[index].activeSince !== undefined) {
                 //Beim letzten Verlassen wurde nicht zurückgesetzt (Fehler)
-                console.log("Das letzte Verlassen eines CHannels wurde nicht aufgezeichnet");
+                console.log("Das letzte Verlassen von "+id+" eines CHannels wurde nicht aufgezeichnet");
             }
             this.targets[index].activeSince = connectionTime;
 
             this.save();
         } else {
-            console.log("Target welches bearbeitet werden sollte wurde nicht gefunden");
+            console.log(id+" welches bearbeitet werden sollte wurde nicht gefunden");
         }
     }
 
@@ -122,15 +122,15 @@ export class Observer {
             const target = this.targets[index];
             if (target.activeSince !== undefined) {
                 target.minutesOnServerToday += Math.floor((disconnectionTime - target.activeSince) / 60000);
-                console.log("Minuten wurden überarbeitet auf" + target.minutesOnServerToday);
+                console.log("Minuten von "+ id+ " wurden überarbeitet auf " + target.minutesOnServerToday);
                 target.activeSince = undefined;
             } else {
-                console.log("Das letzte Connecten wurde nicht aufgezeichnet");
+                console.log("Das letzte Connecten von "+id+" wurde nicht aufgezeichnet");
             }
 
             this.save();
         } else {
-            console.log("Target welches bearbeitet werden sollte wurde nicht gefunden");
+            console.log(id+" welcher bearbeitet werden sollte wurde nicht gefunden");
         }
     }
 
@@ -143,27 +143,27 @@ export class Observer {
             //Wenn der Nutzer aktuell aufgezeichnet wird
             if (target.activeSince !== undefined) {
                 target.minutesOnServerToday += Math.floor((updateTime - target.activeSince) / 60000);
-                console.log("Minuten wurden überarbeitet auf" + target.minutesOnServerToday);
+                console.log("Minuten von "+id+" wurden überarbeitet auf" + target.minutesOnServerToday);
                 target.activeSince = undefined;
             } else {
                 //Wenn der Nutzer aktuell nicht aufgezeichnet wird
-                console.log("Das letzte Connecten wurde nicht aufgezeichnet");
+                console.log("Das letzte Connecten von "+id+" wurde nicht aufgezeichnet");
             }
 
             if (message.member !== null) {
                 //Member befindet sich gerade in einem Channel
                 if (message.member.voice.channel != null && message.member.voice.channel.guild.id === this.bot.guildid) {
                     target.activeSince = updateTime;
-                    console.log("zeit für den Member wurde gupdated");
+                    console.log("zeit für "+ message.member.user.username+ " wurde gupdated auf "+ updateTime.toString());
                 }
             } else {
                 target.activeSince = undefined;
-                console.log("zeit update fehlgeschlagen, da die Message keinen member besitzt");
+                console.log("zeit update für " + id+ " fehlgeschlagen, da die Message keinen member besitzt");
             }
 
             this.save();
         } else {
-            console.log("Target welches geupdated werden sollte wurde nicht gefunden");
+            console.log(id+" welches geupdated werden sollte wurde nicht gefunden");
         }
     }
 
@@ -186,7 +186,7 @@ export class Observer {
         if (index !== null) {
             return this.targets[index];
         } else {
-            console.log("Target welches zurückgegeben werden sollte wurde nicht gefunden");
+            console.log(id+" welches zurückgegeben werden sollte wurde nicht gefunden");
             return null;
         }
     }

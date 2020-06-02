@@ -9,6 +9,12 @@ const COMMAND_PREFIX = "!";
 export function onMessage(bot: Bot, message: Message) {
     if (message.author.bot) return;
 
+    const member = message.member;
+    if (member == null){
+        console.log("Zu einer Message konnte kein Member ermittelt werden");
+        return;
+    }
+
     const isCommand = message.content.startsWith(COMMAND_PREFIX);
 
     if (isCommand) {
@@ -20,6 +26,9 @@ export function onMessage(bot: Bot, message: Message) {
 
 function handleCommand(bot: Bot, message: Message) {
     const { content, channel, member } = message;
+    if(!bot.allowedChannels.includes(channel.id)){ //Befehl wurde nicht im Bot Channel aufgerufen
+        return;
+    }
 
     const args = content.substring(COMMAND_PREFIX.length).split(" ");
 
@@ -202,15 +211,18 @@ function handleNormalMessage(bot: Bot, message: Message) {
     //     );
     //     channel.send("Meinten sie vlt: ", attachment);
     // }
-    if (msg.includes("alarm")) {
-        const embed = new MessageEmbed().setTitle("ALARM").setColor(0xff0000).setDescription("ALARM! ALARM!");
-        channel.send(embed);
-    }
+    // if (msg.includes("alarm")) {
+    //     const embed = new MessageEmbed().setTitle("ALARM").setColor(0xff0000).setDescription("ALARM! ALARM!");
+    //     channel.send(embed);
+    // }
     // if (msg.includes("maul")) {
     //     channel.send("Es gibt Maul und es gibt Halts Maul!");
     // }
     if (msg.includes("gute_nacht")) {
-        channel.send(`Gute Nacht, ${author.toString()}!`);
+        message.react("🇨");
+        message.react("🇮");
+        message.react("🇦");
+        message.react("🇴");
     }
     // if (msg.includes("kek") || msg.includes("schmutz")) {
     //     channel.send(`Oh jeee, ${author.toString()} :rofl:`);
