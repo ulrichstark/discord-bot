@@ -121,7 +121,7 @@ export class Observer {
         if (index !== null) {
             const target = this.targets[index];
             if (target.activeSince !== undefined) {
-                const mins = Math.floor((disconnectionTime - target.activeSince) / 60000);
+                var mins = Math.floor((disconnectionTime - target.activeSince) / 60000);
                 if(mins > 1200){
                   console.log("Die upzudatende Zeit von "+id+" betrug über 20 h weshalb ein Fehler angenommen wird");
                   mins = 0;
@@ -146,7 +146,7 @@ export class Observer {
 
             //Wenn der Nutzer aktuell aufgezeichnet wird
             if (target.activeSince !== undefined) {
-                const mins = Math.floor((disconnectionTime - target.activeSince) / 60000);
+                var mins = Math.floor((updateTime - target.activeSince) / 60000);
                 if(mins > 1200){
                   console.log("Die upzudatende Zeit von "+id+" betrug über 20 h weshalb ein Fehler angenommen wird");
                   mins = 0;
