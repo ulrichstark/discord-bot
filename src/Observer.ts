@@ -121,13 +121,17 @@ export class Observer {
         if (index !== null) {
             const target = this.targets[index];
             if (target.activeSince !== undefined) {
-                target.minutesOnServerToday += Math.floor((disconnectionTime - target.activeSince) / 60000);
+                const mins = Math.floor((disconnectionTime - target.activeSince) / 60000);
+                if(mins > 1200){
+                  console.log("Die upzudatende Zeit von "+id+" betrug über 20 h weshalb ein Fehler angenommen wird");
+                  mins = 0;
+                }
+                target.minutesOnServerToday += mins;
                 console.log("Minuten von "+ id+ " wurden überarbeitet auf " + target.minutesOnServerToday);
                 target.activeSince = undefined;
             } else {
                 console.log("Das letzte Connecten von "+id+" wurde nicht aufgezeichnet");
             }
-
             this.save();
         } else {
             console.log(id+" welcher bearbeitet werden sollte wurde nicht gefunden");
@@ -142,7 +146,12 @@ export class Observer {
 
             //Wenn der Nutzer aktuell aufgezeichnet wird
             if (target.activeSince !== undefined) {
-                target.minutesOnServerToday += Math.floor((updateTime - target.activeSince) / 60000);
+                const mins = Math.floor((disconnectionTime - target.activeSince) / 60000);
+                if(mins > 1200){
+                  console.log("Die upzudatende Zeit von "+id+" betrug über 20 h weshalb ein Fehler angenommen wird");
+                  mins = 0;
+                }
+                target.minutesOnServerToday += mins;
                 console.log("Minuten von "+id+" wurden überarbeitet auf" + target.minutesOnServerToday);
                 target.activeSince = undefined;
             } else {
@@ -154,7 +163,7 @@ export class Observer {
                 //Member befindet sich gerade in einem Channel
                 if (message.member.voice.channel != null && message.member.voice.channel.guild.id === this.bot.guildid) {
                     target.activeSince = updateTime;
-                    console.log("zeit für "+ message.member.user.username+ " wurde gupdated auf "+ updateTime.toString());
+                    console.log(message.member.user.username+ " befand sich beim update in einem Channel und seine Zeit wurde gupdated auf "+ updateTime.toString());
                 }
             } else {
                 target.activeSince = undefined;
