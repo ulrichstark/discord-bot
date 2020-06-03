@@ -151,14 +151,15 @@ export class Observer {
                   console.log("Die upzudatende Zeit von "+id+" betrug über 20 h weshalb ein Fehler angenommen wird");
                   mins = 0;
                 }
+                if (message.member && message.member.voice.channel == null) {
+                    target.activeSince = undefined;
+                    console.log(message.member.user.username+ " befand sich beim update in keinem Channel aber seine aktiveSince war nicht zurückgesetzt ->Fehler)");
+                    mins = 0;
+                }
                 target.minutesOnServerToday += mins;
                 console.log("Minuten von "+id+" wurden überarbeitet auf" + target.minutesOnServerToday);
                 target.activeSince = undefined;
-            } else {
-                //Wenn der Nutzer aktuell nicht aufgezeichnet wird
-                console.log("Das letzte Connecten von "+id+" wurde nicht aufgezeichnet");
-            }
-
+            } 
             if (message.member !== null) {
                 //Member befindet sich gerade in einem Channel
                 if (message.member.voice.channel != null && message.member.voice.channel.guild.id === this.bot.guildid) {
