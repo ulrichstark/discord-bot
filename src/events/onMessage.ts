@@ -1,10 +1,8 @@
 import {Message, MessageAttachment, MessageEmbed} from "discord.js";
 import { Bot } from "../Bot";
-import { strict } from "assert";
-import { Observer } from "../Observer";
-import { Target } from "../Target";
 
 const COMMAND_PREFIX = "!";
+const MONATESTRING = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
 export function onMessage(bot: Bot, message: Message) {
     if (message.author.bot) return;
@@ -26,7 +24,7 @@ export function onMessage(bot: Bot, message: Message) {
 
 function handleCommand(bot: Bot, message: Message) {
     const { content, channel, member } = message;
-    if(!bot.allowedChannels.includes(channel.id)){ //Befehl wurde nicht im Bot Channel aufgerufen
+    if(!bot.allowedChannels.includes(channel.id)){ //Befehl wurde nicht in einem Bot Channel aufgerufen
         return;
     }
 
@@ -37,7 +35,11 @@ function handleCommand(bot: Bot, message: Message) {
             var output = "Alle implementierten Befehle:\n";
             output += "!startObserving: Starte die Überwachung deiner Onlinezeit\n";
             output += "!stopObserving: Beende die Überwachung deiner Onlinezeit\n";
-            output += "!uptime: Zeige deine aktuelle Onlinezeit an\n";
+            output += "!uptime: Zeige Onlineübersicht an\n";
+            output += "!day: Zeige Onlineübersicht an\n";
+            output += "!week: Zeige Onlineübersicht an\n";
+            output += "!month: Zeige Onlineübersicht an\n";
+            output += "!year: Zeige Onlineübersicht an\n";
             output += "!setColor <farbe>: Setze deine persönliche Farbe\n";
             output += "!colors: Erhalte eine Liste der erlaubten Farben\n";
             output += "!top3: Erhalte eine Top3 Liste der Onlinezeiten\n";
@@ -59,15 +61,25 @@ function handleCommand(bot: Bot, message: Message) {
         }
         case "startObserving": {
             if (member) {
-                bot.observer.addTarget(member.id, message);
-                message.reply("Hinzugefügt!");
+                var success = bot.observer.addTarget(member.id, message);
+
+                if(success === 0){
+                    message.reply("Hinzugefügt!");
+                }else{
+                    message.reply("Oh je, das hat nicht geklappt!");
+                }
             }
             break;
         }
         case "stopObserving": {
             if (member) {
-                bot.observer.removeTarget(member.id);
-                message.reply("Entfernt!");
+                var success = bot.observer.removeTarget(member.id);
+
+                if(success===0){
+                    message.reply("Entfernt!");
+                }else{
+                    message.reply("Oh je, das hat nicht geklappt!");
+                }
             }
             break;
         }
@@ -97,27 +109,73 @@ function handleCommand(bot: Bot, message: Message) {
             if(member){
                 bot.observer.update(member.id, message, Date.now()); //Targeteintrag updaten
                 const target = bot.observer.getTarget(member.id); //Targeteintrag holen
+                const monat = new Date().getMonth();
 
                 if(target !== null){
-                    var minutes = target.minutesOnServerToday;
-                    if(minutes === undefined || minutes === null){
-                        minutes = 0;
+                    var minutesTotal = target.minutesOnServerToday;
+                    if(minutesTotal === undefined || minutesTotal === null){
+                        minutesTotal = 0;
                     }
-                    var stunden = Math.floor(minutes / 60);
-                    minutes = minutes %60;
+                    var stundenTotal = Math.floor(minutesTotal / 60);
+                    minutesTotal = minutesTotal %60;
+                    var tageTotal = Math.floor(stundenTotal/24);
+                    stundenTotal = stundenTotal % 24;
+
+
+                    var minutesToday = target.minutesToday;
+                    if(minutesToday === undefined || minutesToday === null){
+                        minutesToday = 0;
+                    }
+                    var stundenToday = Math.floor(minutesToday / 60);
+                    minutesToday = minutesToday %60;
+
+
+                    var minutesWeek = target.minutesWeek;
+                    if(minutesWeek === undefined || minutesWeek === null){
+                        minutesWeek = 0;
+                    }
+                    var stundenWeek = Math.floor(minutesWeek / 60);
+                    minutesWeek = minutesWeek %60;
+                    var tageWeek = Math.floor(stundenWeek/24);
+                    stundenWeek = stundenWeek % 24;
+
+
+                    var minutesMonths = target.minutesMonths;
+                    var minutesMonth = 0;
+                    if(minutesMonths){
+                        minutesMonth = minutesMonths[monat];
+                    }                    
+                    var stundenMonth = Math.floor(minutesMonth / 60);
+                    minutesMonth = minutesMonth %60;
+                    var tageMonth = Math.floor(stundenMonth/24);
+                    stundenMonth = stundenMonth % 24;
+
+
+                    var minutesYear = target.minutesYear;
+                    if(minutesYear === undefined || minutesYear === null){
+                        minutesYear = 0;
+                    }
+                    var stundenYear = Math.floor(minutesYear / 60);
+                    minutesYear = minutesYear %60;
+                    var tageYear = Math.floor(stundenYear/24);
+                    stundenYear = stundenYear % 24;
+
 
                     var color = target.color;
                     if(color === undefined){
                         color = "DEFAULT";
                     }
                     
-                    const embed = new MessageEmbed().setTitle("Heutige Onlinezeit")
+                    const embed = new MessageEmbed().setTitle("Onlinezeit Übersicht")
                                                     .setColor(color)
                                                     .setDescription(member.user.username.toString())
                                                     .setThumbnail(member.user.displayAvatarURL())
                                                     .addFields(
-                                                        { name: 'Stunden', value: stunden.toString(), inline : true },
-                                                        { name: 'Minuten', value: minutes.toString(), inline: true },
+                                                        { name: 'Heute', value: stundenToday.toString()+ "h "+ minutesToday+"min", inline: true },
+                                                        { name: 'Woche', value: tageWeek.toString()+"d "+ stundenWeek.toString()+ "h "+ minutesWeek+"min", inline : true },
+                                                        { name: 'Monat', value: tageMonth.toString()+"d "+ stundenMonth.toString()+ "h "+ minutesMonth+"min", inline : true },
+                                                        { name: 'Jahr', value: tageYear.toString()+"d "+ stundenYear.toString()+ "h "+ minutesYear+"min", inline : true },
+                                                        { name: 'Gesamt', value: tageTotal.toString()+"d "+ stundenTotal.toString()+ "h "+ minutesTotal+"min", inline : true },
                                                     );
                     channel.send(embed);
                     
@@ -127,6 +185,175 @@ function handleCommand(bot: Bot, message: Message) {
             }
             break;
         }
+        case "day":{
+            if(member){
+                bot.observer.update(member.id, message, Date.now()); //Targeteintrag updaten
+                const target = bot.observer.getTarget(member.id); //Targeteintrag holen
+
+                if(target !== null){
+                    var minutesToday = target.minutesToday;
+                    if(minutesToday === undefined || minutesToday === null){
+                        minutesToday = 0;
+                    }
+                    var stunden = Math.floor(minutesToday / 60);
+                    minutesToday = minutesToday %60;
+
+                    var color = target.color;
+                    if(color === undefined){
+                        color = "DEFAULT";
+                    }
+                    
+                    const embed = new MessageEmbed().setTitle("Onlinezeit heute")
+                                                    .setColor(color)
+                                                    .setDescription(member.user.username.toString())
+                                                    .setThumbnail(member.user.displayAvatarURL())
+                                                    .addFields(
+                                                        { name: 'Stunden', value: stunden.toString(), inline : true },
+                                                        { name: 'Minuten', value: minutesToday.toString(), inline: true },
+                                                    );
+                    channel.send(embed);
+                    
+                }else{
+                    message.reply("Oh jee! Du wurdest heute nicht überwacht!");
+                }
+            }
+            break;
+        }
+
+        case "week":{
+            if(member){
+                bot.observer.update(member.id, message, Date.now()); //Targeteintrag updaten
+                const target = bot.observer.getTarget(member.id); //Targeteintrag holen
+
+                if(target !== null){
+                    var minutesWeek = target.minutesWeek;
+                    if(minutesWeek === undefined || minutesWeek === null){
+                        minutesWeek = 0;
+                    }
+                    var stunden = Math.floor(minutesWeek / 60);
+                    minutesWeek = minutesWeek %60;
+                    var tage = Math.floor(stunden/24);
+                    stunden = stunden % 24;
+
+                    var color = target.color;
+                    if(color === undefined){
+                        color = "DEFAULT";
+                    }
+                    
+                    const embed = new MessageEmbed().setTitle("Onlinezeit in dieser Woche")
+                                                    .setColor(color)
+                                                    .setDescription(member.user.username.toString())
+                                                    .setThumbnail(member.user.displayAvatarURL())
+                                                    .addFields(
+                                                        { name: 'Tage', value: tage.toString(), inline: true },
+                                                        { name: 'Stunden', value: stunden.toString(), inline : true },
+                                                        { name: 'Minuten', value: minutesWeek.toString(), inline: true },
+                                                    );
+                    channel.send(embed);
+                    
+                }else{
+                    message.reply("Oh jee! Du wurdest heute nicht überwacht!");
+                }
+            }
+            break;
+        }
+
+        case "month":{
+            if(member){
+                bot.observer.update(member.id, message, Date.now()); //Targeteintrag updaten
+                const target = bot.observer.getTarget(member.id); //Targeteintrag holen
+                const monat = new Date().getMonth();
+
+                if(target !== null){
+                    var minutesMonths = target.minutesMonths;
+                    var minutesMonth = 0;
+                    if(minutesMonths){
+                        minutesMonth = minutesMonths[monat];
+                    }
+                    var stunden = Math.floor(minutesMonth / 60);
+                    minutesMonth = minutesMonth %60;
+                    var tage = Math.floor(stunden/24);
+                    stunden = stunden % 24;
+
+                    var color = target.color;
+                    if(color === undefined){
+                        color = "DEFAULT";
+                    }
+                    
+                    const embed = new MessageEmbed().setTitle("Onlinezeit in diesem Monat")
+                                                    .setColor(color)
+                                                    .setDescription(member.user.username.toString())
+                                                    .setThumbnail(member.user.displayAvatarURL())
+                                                    .addFields(
+                                                        { name: 'Tage', value: tage.toString(), inline: true },
+                                                        { name: 'Stunden', value: stunden.toString(), inline : true },
+                                                        { name: 'Minuten', value: minutesMonth.toString(), inline: true },
+                                                    );
+                    channel.send(embed);
+                    
+                }else{
+                    message.reply("Oh jee! Du wurdest heute nicht überwacht!");
+                }
+            }
+            break;
+        }
+
+        case "year":{
+            if(member){
+                bot.observer.update(member.id, message, Date.now()); //Targeteintrag updaten
+                const target = bot.observer.getTarget(member.id); //Targeteintrag holen
+
+                if(target !== null){
+                    var minutesMonths = target.minutesMonths;
+                    if(minutesMonths === undefined){
+                        minutesMonths = [0,0,0,0,0,0,0,0,0,0,0,0];
+                    }
+
+                    var color = target.color;
+                    if(color === undefined){
+                        color = "DEFAULT";
+                    }
+
+                    var minutesYear = target.minutesYear;
+                    if(minutesYear === undefined || minutesYear === null){
+                        minutesYear = 0;
+                    }
+                    var stundenYear = Math.floor(minutesYear / 60);
+                    minutesYear = minutesYear %60;
+                    var tageYear = Math.floor(stundenYear/24);
+                    stundenYear = stundenYear % 24;
+
+                    const embed = new MessageEmbed().setTitle("Onlinezeit in diesem Jahr")
+                                                    .setColor(color)
+                                                    .setDescription(member.user.username.toString())
+                                                    .setThumbnail(member.user.displayAvatarURL())
+                                                    .addFields(
+                                                        { name: 'Tage', value: tageYear.toString(), inline: true },
+                                                        { name: 'Stunden', value: stundenYear.toString(), inline : true },
+                                                        { name: 'Minuten', value: minutesYear.toString(), inline: true },
+                                                    );
+
+                    for(var i = 0; i< 12; i++){
+
+                        var minutesMonth = minutesMonths[i];
+                        var stundenMonth = Math.floor(minutesMonth / 60);
+                        minutesMonth = minutesMonth %60;
+                        var tagemonth = Math.floor(stundenMonth/24);
+                        stundenMonth = stundenMonth % 24;
+    
+                        embed.addField(MONATESTRING[i], tagemonth.toString()+"d "+ stundenMonth.toString()+ "h "+ minutesMonth+"min", true);
+
+                    }
+                    channel.send(embed);
+
+                    
+                }else{
+                    message.reply("Oh jee! Du wurdest heute nicht überwacht!");
+                }
+            }
+            break;
+        }
+
         case "setColor":{
             if(member){
                 if (args.length < 2) {
@@ -178,7 +405,7 @@ function handleCommand(bot: Bot, message: Message) {
                     if(minutes === undefined || minutes === null){
                         minutes = 0;
                     }
-                    var stunden = Math.floor(minutes / 60);
+                    let stunden = Math.floor(minutes / 60);
                     minutes = minutes %60;
 
                     const { id } = target;

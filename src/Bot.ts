@@ -20,8 +20,10 @@ export class Bot {
 
         this.observer = new Observer(this);
 
-        // const channelPromise = this.bot.channels.fetch("690914667220172940");
-        // channelPromise.then((channel) => console.log("Channel:", channel));
+        this.observer.botRestart(); // Alle activeSince zurücksetzen wegen Server restart
+
+        this.observer.timeSchedule(); // Zeitscheduling starten (Tagesreset usw.)
+
     }
 
     public login() {

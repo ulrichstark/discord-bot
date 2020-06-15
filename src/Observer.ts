@@ -57,6 +57,10 @@ export class Observer {
                 id: id,
                 minutesOnServerToday: 0,
                 color: "RANDOM",
+                minutesMonths : [0,0,0,0,0,0,0,0,0,0,0,0],
+                minutesToday : 0,
+                minutesWeek :0,
+                minutesYear: 0,                
             };
 
             if (message.member !== null) {
@@ -68,7 +72,14 @@ export class Observer {
 
             this.targets.push(target);
             this.save();
+
+            return 0;
+
+        }else{
+            return 1;
         }
+
+
     }
 
     public removeTarget(id: string) {
@@ -77,6 +88,9 @@ export class Observer {
         if (index !== null) {
             this.targets.splice(index, 1);
             this.save();
+            return 0;
+        }else{  
+            return 1;
         }
     }
 
@@ -122,11 +136,9 @@ export class Observer {
             const target = this.targets[index];
             if (target.activeSince !== undefined) {
                 var mins = Math.floor((disconnectionTime - target.activeSince) / 60000);
-                if(mins > 1200){
-                  console.log("Die upzudatende Zeit von "+id+" betrug über 20 h weshalb ein Fehler angenommen wird");
-                  mins = 0;
-                }
-                target.minutesOnServerToday += mins;
+
+                this.setTime(target, mins);
+
                 console.log("Minuten von "+ id+ " wurden überarbeitet auf " + target.minutesOnServerToday);
                 target.activeSince = undefined;
             } else {
@@ -138,6 +150,34 @@ export class Observer {
         }
     }
 
+    public setTime(target: Target, minutes: number){
+        const monat = new Date().getMonth();
+        target.minutesOnServerToday+= minutes;
+
+        if(target.minutesToday)
+            target.minutesToday += minutes; 
+        else
+            target.minutesToday=minutes;
+
+        if(target.minutesWeek)
+            target.minutesWeek += minutes;
+        else
+            target.minutesWeek = minutes
+
+        if(target.minutesMonths){
+            target.minutesMonths[monat] += minutes;
+        }
+        else{
+            target.minutesMonths = [0,0,0,0,0,0,0,0,0,0,0,0];
+            target.minutesMonths[monat] = minutes;
+        }
+
+        if(target.minutesYear)
+            target.minutesYear+=minutes;
+        else
+            target.minutesYear=minutes;
+    }
+
     public update(id: string, message: Message, updateTime: number) {
         const index = this.findIndexOfTarget(id);
 
@@ -147,17 +187,14 @@ export class Observer {
             //Wenn der Nutzer aktuell aufgezeichnet wird
             if (target.activeSince !== undefined) {
                 var mins = Math.floor((updateTime - target.activeSince) / 60000);
-                if(mins > 1200){
-                  console.log("Die upzudatende Zeit von "+id+" betrug über 20 h weshalb ein Fehler angenommen wird");
-                  mins = 0;
-                }
+
                 if (message.member && message.member.voice.channel == null) {
                     target.activeSince = undefined;
                     console.log(message.member.user.username+ " befand sich beim update in keinem Channel aber seine aktiveSince war nicht zurückgesetzt ->Fehler)");
                     mins = 0;
                 }
-                target.minutesOnServerToday += mins;
-                console.log("Minuten von "+id+" wurden überarbeitet auf" + target.minutesOnServerToday);
+                this.setTime(target,mins);
+                console.log("Minuten von "+id+" wurden überarbeitet auf " + target.minutesOnServerToday);
                 target.activeSince = undefined;
             } 
             if (message.member !== null) {
@@ -170,7 +207,7 @@ export class Observer {
                 target.activeSince = undefined;
                 console.log("zeit update für " + id+ " fehlgeschlagen, da die Message keinen member besitzt");
             }
-
+            //console.log("save");
             this.save();
         } else {
             console.log(id+" welches geupdated werden sollte wurde nicht gefunden");
@@ -213,4 +250,86 @@ export class Observer {
 
         return top;
     }
+
+    public botRestart() {
+        //Alle onSince Zeiten zurücksetzen
+        for (let i = 0; i < this.targets.length; i++) {
+            this.targets[i].activeSince = undefined;
+        }
+        this.save();
+    }
+
+
+    public timeSchedule() {
+
+        const hour = 6;
+        const minute = 0;
+    
+        // create a Date object at the desired timepoint
+        const startTime = new Date();
+        startTime.setHours(hour, minute);
+        const now = new Date();
+    
+        // increase timepoint by 24 hours if in the past
+        if (startTime.getTime() < now.getTime()) {
+          startTime.setHours(startTime.getHours() + 24);
+        }
+    
+        // get the interval in ms from now to the timepoint when to trigger the alarm
+        const firstTriggerAfterMs = startTime.getTime() - now.getTime();
+    
+        // trigger the function triggerThis() at the timepoint
+        // create setInterval when the timepoint is reached to trigger it every day at this timepoint
+        console.log("nächster Tagesreset in: "+ Math.floor(firstTriggerAfterMs/1000/60)  + " minuten um "+ startTime.toString());
+
+        const bot = this;
+        setTimeout(function(){
+            bot.minuteReset();
+            setInterval(bot.minuteReset, 24 * 60 * 60 * 1000);
+          }, firstTriggerAfterMs);
+    
+    }    
+
+    public minuteReset(){
+        const day = new Date();
+
+        //Es ist 6Uhr
+        for (let i = 0; i < this.targets.length; i++) {
+            this.targets[i].minutesToday = 0;
+        }
+        console.log("Tagesreset um 6Uhr");
+
+        if(day.getDate() === 1){//Falls es der 1. des Monats ist
+
+            for (let i = 0; i < this.targets.length; i++) {
+                const target = this.targets[i];
+                if(target.minutesMonths){
+                    target.minutesMonths[day.getMonth()] = 0;
+                }else{
+                    target.minutesMonths = [0,0,0,0,0,0,0,0,0,0,0,0];
+                    console.log("Monatsreset von Monat "+ day.getMonth().toString()+ " bei user "+ target.id+toString() + " fehlgeschlagen. Monatarray resettet" );
+                }
+            }
+            console.log("Monatsreset von Monat "+ day.getMonth().toString() );
+            
+            if(day.getMonth() === 0){//Falls es Januar ist 
+                for (let i = 0; i < this.targets.length; i++) {
+                    this.targets[i].minutesYear = 0;
+                }
+                console.log("Jahresreset");
+            }
+        } 
+        if(day.getDay() === 1){//Falls es Montag ist
+
+            for (let i = 0; i < this.targets.length; i++) {
+                this.targets[i].minutesWeek = 0;
+            }
+            console.log("Wochenreset");
+
+        }
+    
+        this.save();   
+    }
+
+
 }
