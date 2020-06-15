@@ -238,11 +238,104 @@ export class Observer {
         }
     }
 
-    public findTop(count: number) {
+    public topTotal(count: number) {
         var top: Target[] = [];
 
         //Targets nach minutesOnServerToday absteigend sortieren
         this.targets.sort((a, b) => b.minutesOnServerToday - a.minutesOnServerToday);
+
+        for (let i = 0; i < count && i < this.targets.length; i++) {
+            top.push(this.targets[i]);
+        }
+
+        return top;
+    }
+
+    public topToday(count: number){
+        var top: Target[] = [];
+
+        //Targets nach minutesweek absteigend sortieren
+        this.targets.sort((a, b) => {
+            if(b.minutesToday === undefined){
+                return -1;
+            }
+            else if(a.minutesToday === undefined){
+                return 1;
+            }
+            else{
+                return (b.minutesToday - a.minutesToday);
+            }
+        });
+
+        for (let i = 0; i < count && i < this.targets.length; i++) {
+            top.push(this.targets[i]);
+        }
+
+        return top;
+    }
+
+    public topWeek(count: number){
+        var top: Target[] = [];
+
+        //Targets nach minutesweek absteigend sortieren
+        this.targets.sort((a, b) => {
+            if(b.minutesWeek === undefined){
+                return -1;
+            }
+            else if(a.minutesWeek === undefined){
+                return 1;
+            }
+            else{
+                return (b.minutesWeek - a.minutesWeek);
+            }
+        });
+
+        for (let i = 0; i < count && i < this.targets.length; i++) {
+            top.push(this.targets[i]);
+        }
+
+        return top;
+    }
+
+    public topMonth(count: number){
+        var top: Target[] = [];
+        const monat = new Date().getMonth();
+
+        //Targets nach minutesMonth absteigend sortieren
+        this.targets.sort((a, b) => {
+            if(b.minutesMonths === undefined){
+                return -1;
+            }
+            else if(a.minutesMonths === undefined){
+                return 1;
+            }
+            else{
+                return (b.minutesMonths[monat] - a.minutesMonths[monat]);
+            }
+        });
+
+        for (let i = 0; i < count && i < this.targets.length; i++) {
+            top.push(this.targets[i]);
+        }
+
+        return top;
+    }
+
+    public topYear(count: number){
+        var top: Target[] = [];
+
+        //Targets nach minutesweek absteigend sortieren
+        this.targets.sort((a, b) => {
+            if(b.minutesYear === undefined){
+                return -1;
+            }
+            else if(a.minutesYear === undefined){
+                return 1;
+            }
+            else{
+                return (b.minutesYear - a.minutesYear);
+            }
+        });
 
         for (let i = 0; i < count && i < this.targets.length; i++) {
             top.push(this.targets[i]);

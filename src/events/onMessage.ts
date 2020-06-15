@@ -35,14 +35,18 @@ function handleCommand(bot: Bot, message: Message) {
             var output = "Alle implementierten Befehle:\n";
             output += "!startObserving: Starte die Überwachung deiner Onlinezeit\n";
             output += "!stopObserving: Beende die Überwachung deiner Onlinezeit\n";
-            output += "!uptime: Zeige Onlineübersicht an\n";
-            output += "!day: Zeige Onlineübersicht an\n";
-            output += "!week: Zeige Onlineübersicht an\n";
-            output += "!month: Zeige Onlineübersicht an\n";
-            output += "!year: Zeige Onlineübersicht an\n";
+            output += "!uptime: Zeige deine Onlineübersicht an\n";
+            output += "!day: Zeige deine Onlinezeit von heute an\n";
+            output += "!week: Zeige Onlinezeit von dieser Woche an\n";
+            output += "!month: Zeige Onlinezeit von diesem Monat an\n";
+            output += "!year: Zeige Onlinezeit von diesem Jahr an\n";
             output += "!setColor <farbe>: Setze deine persönliche Farbe\n";
             output += "!colors: Erhalte eine Liste der erlaubten Farben\n";
-            output += "!top3: Erhalte eine Top3 Liste der Onlinezeiten\n";
+            output += "!topTotal: Erhalte eine Top3 Liste der insgesamten Onlinezeiten\n";
+            output += "!topDay: Erhalte eine Top3 Liste der heutigen Onlinezeiten\n";
+            output += "!topWeek: Erhalte eine Top3 Liste der Onlinezeiten von dieser Woche\n";
+            output += "!topMonth: Erhalte eine Top3 Liste der Onlinezeiten von diesem Monats\n";
+            output += "!topYear: Erhalte eine Top3 Liste der Onlinezeiten von diesem Jahr\n";
             message.author.send(output);
             break;
         }
@@ -380,23 +384,17 @@ function handleCommand(bot: Bot, message: Message) {
             message.author.send("Erlaubte Farben:\n" + bot.observer.availableColors.toString());
             break;
         }      
-        case "top3":{
+        case "topTotal":{
             if(message.guild == null ){
                 message.reply("Oh jee, das hat nicht geklappt");
                 return;
             }
-            const top = bot.observer.findTop(3);
+            const top = bot.observer.topTotal(3);
 
-            const embed = new MessageEmbed().setTitle("Top 3 Onlinezeiten")
+            const embed = new MessageEmbed().setTitle("Top 3 Onlinezeiten Insgesamt")
                                             .setColor("DARK_GOLD")
-                                            .setFooter("Die Werte der einzelnen Mitglieder könnten nicht aktuell sein");
-
-            // if(message.guild ){
-            //     const banner = message.guild.bannerURL();
-            //     if( banner !== null){
-            //         embed.setThumbnail(banner);
-            //     }
-            // }                       
+                                            .setFooter("Die Werte der einzelnen Mitglieder könnten veraltet sein");
+                   
 
             for(const target of top ){
 
@@ -407,12 +405,51 @@ function handleCommand(bot: Bot, message: Message) {
                     }
                     let stunden = Math.floor(minutes / 60);
                     minutes = minutes %60;
+                    let tage = Math.floor(stunden/24);
+                    stunden = stunden % 24;
 
                     const { id } = target;
                     const member = message.guild.members.resolve(id);
 
                     if (member) {
-                        embed.addField(member.user.username.toString(), stunden.toString()+ " h "+ minutes.toString()+" min" );
+                        embed.addField(member.user.username.toString(), tage.toString() + " d "+ stunden.toString()+ " h "+ minutes.toString()+" min" );
+                    }
+                }
+            }
+
+            channel.send(embed);
+
+            break;
+        }
+        case "topDay":{
+            if(message.guild == null ){
+                message.reply("Oh jee, das hat nicht geklappt");
+                return;
+            }
+            const top = bot.observer.topToday(3);
+
+            const embed = new MessageEmbed().setTitle("Top 3 Onlinezeiten des Tages")
+                                            .setColor("DARK_GOLD")
+                                            .setFooter("Die Werte der einzelnen Mitglieder könnten veraltet sein");
+                   
+
+            for(const target of top ){
+
+                if(target !== null){
+                    var minutes =0;
+                    if(target.minutesToday){
+                        minutes = target.minutesToday;
+                    }
+                    let stunden = Math.floor(minutes / 60);
+                    minutes = minutes %60;
+                    let tage = Math.floor(stunden/24);
+                    stunden = stunden % 24;
+
+                    const { id } = target;
+                    const member = message.guild.members.resolve(id);
+
+                    if (member) {
+                        embed.addField(member.user.username.toString(), tage.toString() + " d "+ stunden.toString()+ " h "+ minutes.toString()+" min" );
                     }
                 }
             }
@@ -421,6 +458,119 @@ function handleCommand(bot: Bot, message: Message) {
 
             break;
         }        
+        case "topWeek":{
+            if(message.guild == null ){
+                message.reply("Oh jee, das hat nicht geklappt");
+                return;
+            }
+            const top = bot.observer.topWeek(3);
+
+            const embed = new MessageEmbed().setTitle("Top 3 Onlinezeiten der Woche")
+                                            .setColor("DARK_GOLD")
+                                            .setFooter("Die Werte der einzelnen Mitglieder könnten veraltet sein");
+                   
+
+            for(const target of top ){
+
+                if(target !== null){
+                    var minutes =0;
+                    if(target.minutesWeek){
+                        minutes = target.minutesWeek;
+                    }
+                    let stunden = Math.floor(minutes / 60);
+                    minutes = minutes %60;
+                    let tage = Math.floor(stunden/24);
+                    stunden = stunden % 24;
+
+                    const { id } = target;
+                    const member = message.guild.members.resolve(id);
+
+                    if (member) {
+                        embed.addField(member.user.username.toString(), tage.toString() + " d "+ stunden.toString()+ " h "+ minutes.toString()+" min" );
+                    }
+                }
+            }
+
+            channel.send(embed);
+
+            break;
+        }      
+        case "topMonth":{
+            if(message.guild == null ){
+                message.reply("Oh jee, das hat nicht geklappt");
+                return;
+            }
+            const top = bot.observer.topMonth(3);
+
+            const embed = new MessageEmbed().setTitle("Top 3 Onlinezeiten des Monats")
+                                            .setColor("DARK_GOLD")
+                                            .setFooter("Die Werte der einzelnen Mitglieder könnten veraltet sein");
+                   
+
+            for(const target of top ){
+
+                if(target !== null){
+                    var minutes =0;
+                    var monat = new Date().getMonth();
+                    if(target.minutesMonths){
+                        minutes = target.minutesMonths[monat];
+                    }
+                    let stunden = Math.floor(minutes / 60);
+                    minutes = minutes %60;
+                    let tage = Math.floor(stunden/24);
+                    stunden = stunden % 24;
+
+                    const { id } = target;
+                    const member = message.guild.members.resolve(id);
+
+                    if (member) {
+                        embed.addField(member.user.username.toString(), tage.toString() + " d "+ stunden.toString()+ " h "+ minutes.toString()+" min" );
+                    }
+                }
+            }
+
+            channel.send(embed);
+
+            break;
+        }
+        case "topYear":{
+            if(message.guild == null ){
+                message.reply("Oh jee, das hat nicht geklappt");
+                return;
+            }
+            const top = bot.observer.topYear(3);
+
+            const embed = new MessageEmbed().setTitle("Top 3 Onlinezeiten des Jahres")
+                                            .setColor("DARK_GOLD")
+                                            .setFooter("Die Werte der einzelnen Mitglieder könnten veraltet sein");
+                   
+
+            for(const target of top ){
+
+                if(target !== null){
+                    var minutes =0;
+                    if(target.minutesYear){
+                        minutes = target.minutesYear;
+                    }
+                    let stunden = Math.floor(minutes / 60);
+                    minutes = minutes %60;
+                    let tage = Math.floor(stunden/24);
+                    stunden = stunden % 24;
+
+                    const { id } = target;
+                    const member = message.guild.members.resolve(id);
+
+                    if (member) {
+                        embed.addField(member.user.username.toString(), tage.toString() + " d "+ stunden.toString()+ " h "+ minutes.toString()+" min" );
+                    }
+                }
+            }
+
+            channel.send(embed);
+
+            break;
+        }
+            
     }
 }
 
