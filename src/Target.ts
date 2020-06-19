@@ -1,6 +1,6 @@
 export interface Target {
     id: string; //Member id
-    minutesOnServerToday: number; //aka insgesamte Zeit 
+    minutesOnServerToday: number; //aka insgesamte Zeit
     activeSince?: number;
     color?: string;
     minutesToday?: number;
